@@ -1,0 +1,14 @@
+{
+  "name": "PythonJS Publisher",
+  "version": "0.0.6",
+  "description": "PythonJS Multiplatform Publisher",
+  "main": "main.html",
+  "window": {
+    "width": 900,
+    "height": 600,
+    "show": true,
+    "title": "pypubjs",
+    "toolbar": true,
+    "frame": true
+  }
+}
