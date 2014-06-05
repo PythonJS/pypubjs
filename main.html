@@ -14,15 +14,29 @@
 <script type="text/javascript">
 var fs = require('fs')
 var nw_gui = require('nw.gui')
-var pythonjs = require('/home/brett/PythonJS/pythonjs/python-js')
-console.log( pythonjs )
+//var pythonjs = require('/home/brett/PythonJS/pythonjs/python-js')
+var pythonjs = require('python-js')
+
 function translate_app() {
 	var pycode = fs.readFileSync( './app.py', {'encoding':'utf8'} )
 	var jscode = pythonjs.translator.to_javascript( pycode )
 	eval( pythonjs.runtime.javascript + jscode )
 }
-</script>
 
+function translate( options ) {
+	console.log('translate...')
+	console.log(options.data)
+	console.log( pythonjs )
+	var jscode = pythonjs.translator.to_javascript( options.data )
+	if (options.callback) {
+		console.log('translate -> callback')
+		options.callback( jscode )
+	}
+	return jscode
+}
+
+
+</script>
 
 </head>
 
@@ -62,7 +76,7 @@ function translate_app() {
 
 	</td>
 	<td>
-		<small>pypubjs 0.0.5</small>
+		<small>pypubjs 0.0.6</small>
 	</td>
 
 	<td style="-webkit-app-region: no-drag;">
@@ -119,9 +133,6 @@ function translate_app() {
 		<li><a href="#images-tab" data-toggle="tab">images</a></li>
 		<li><a href="#videos-tab" data-toggle="tab">videos</a></li>
 		<li><a href="#audio-tab" data-toggle="tab">audio</a></li>
-		<li><a href="#empythoned-tab" data-toggle="tab">console</a></li>
-
-		<li><a href="#project-tab" data-toggle="tab">project</a></li>
 		<li><a href="#pixi-tab" data-toggle="tab">pixi.js</a></li>
 
 	</ul>
@@ -382,19 +393,6 @@ function translate_app() {
 				<ul class="thumbnails" id="AUDIO">
 					<li></li>
 				</ul>
-			</div>
-		</div>
-
-		<div class="tab-pane" id="empythoned-tab">
-			<div class="well">
-				<legend>Empythoned Console</legend>
-				<textarea rows="20" cols="180" style="width: 99%;" id="EMPYTHONED_OUTPUT"></textarea>
-				<br/>
-				<input
-					type="text" 
-					class="input-block-level"
-					onkeydown="if (event.keyCode == 13) update_empythoned_console(this)"/>
-
 			</div>
 		</div>
 

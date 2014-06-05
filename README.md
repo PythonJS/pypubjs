@@ -9,6 +9,7 @@ Installing
 -------
 ```
 npm install python-js
+npm install phonegap
 sudo npm install nodewebkit -g
 ```
 

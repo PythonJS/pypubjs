@@ -1,6 +1,9 @@
 # PythonJS Integrated Development Environment "pypubjs"
 # by Brett Hartshorn - copyright 2014
 # License: "New BSD"
+import os          ## nodejs only
+import tempfile    ## nodejs only
+import subprocess  ## nodejs only
 
 nw_gui = require('nw.gui')
 Reader = new( FileReader() )
@@ -15,126 +18,14 @@ css_editor.setValue( 'body {\n  background-color:lightgray;\n}\n' )
 js_body_editor = ace.edit( 'EDITOR_BODY_JS' )
 js_body_editor.setTheme("ace/theme/monokai")
 js_body_editor.getSession().setMode("ace/mode/javascript")
-js_body_editor.setValue( 'console.log("hello world")' )
+js_body_editor.setValue( '' )
 
 js_head_editor = ace.edit( 'EDITOR_HEAD_JS' )
 js_head_editor.setTheme("ace/theme/monokai")
 js_head_editor.getSession().setMode("ace/mode/javascript")
 js_head_editor.setValue( '' )
 
-_pycode_ = """
-demo = None
-world = None
-
-def create_blob(N=10, M=10, k=1000, d=10, l=0.35, m=1):
-	bodies = []
-
-	#// Create particle bodies
-	particleShape = new(p2.Particle())
-	for i in range(N):
-		bodies.push([])
-		for j in range(M):
-			p = new(p2.Body(
-				mass=m,
-				position=[(i-N/2)*l*1.05, (j-M/2)*l*1.05]
-			))
-			p.addShape(particleShape)
-			bodies[i].push(p)
-			world.addBody(p)
-
-	#// Vertical springs
-	for i in range(N):
-		for j in range(M-1):
-			bodyA = bodies[i][j];
-			bodyB = bodies[i][j+1];
-			spring = new(p2.Spring(
-				bodyA,bodyB,
-				stiffness=k,
-				restLength=l,
-				damping=d
-			))
-			world.addSpring(spring)
-
-	#// Horizontal springs
-	for i in range(N-1):
-		for j in range(M):
-			bodyA = bodies[i][j];
-			bodyB = bodies[i+1][j];
-			spring = new( p2.Spring(
-				bodyA,bodyB,
-				stiffness=k,
-				restLength=l,
-				damping=d
-			))
-			world.addSpring(spring)
-
-	#// Diagonal right/down springs
-	for i in range(N-1):
-		for j in range(M-1):
-			a = bodies[i][j]
-			b = bodies[i+1][j+1]
-			spring = new(p2.Spring(
-				a,b,
-				stiffness=k,
-				restLength=Math.sqrt(l*l + l*l)
-			))
-			world.addSpring(spring)
-
-	#// Diagonal left/down springs
-	for i in range(N-1):
-		for j in range(M-1):
-			a = bodies[i+1][j]
-			b = bodies[i][j+1]
-			spring = new(p2.Spring(
-				a,b,
-				stiffness=k,
-				restLength=Math.sqrt(l*l + l*l)
-			))
-			world.addSpring(spring)
-
-
-def main():
-	global demo, world
-	bp = new( p2.SAPBroadphase() )
-
-	world = new(
-		p2.World(
-			doProfiling=True,
-			gravity = [0, -10],
-			broadphase = bp
-		)
-	)
-
-	create_blob( N=5, M=5 )
-
-
-	planeShape = new( p2.Plane() )
-	plane = new( p2.Body(position=[0,-2]) )
-	plane.addShape( planeShape )
-	world.addBody( plane )
-
-	concaveBody = new(
-		p2.Body( mass=1, position=[0,2] )
-	)
-	path = [
-		[-1, 1],
-		[-1, 0],
-		[1, 0],
-		[1, 1],
-		[0.5, 0.5]
-	]
-	concaveBody.fromPolygon(path)
-	world.addBody(concaveBody)
-
-	demo = new(PixiDemo(world))
-	demo.setState(Demo.DRAWPOLYGON)
-
-	def on_add_body(evt):
-		evt.body.setDensity(1)
-
-	world.on("addBody",on_add_body)
-
-"""
+_pycode_ = """def on_click(btn): btn.firstChild.nodeValue='hello world' """
 
 py_body_editor = ace.edit( 'EDITOR_BODY_PY' )
 py_body_editor.setTheme("ace/theme/monokai")
@@ -147,22 +38,10 @@ py_head_editor.getSession().setMode("ace/mode/python")
 py_head_editor.setValue( '' )
 
 
-_html_ = """
-<div class="navbar">
-	<button class="btn btn-inverse" onclick="javascript:main()">run</button>
-	<button class="btn btn-warning" onclick="javascript:demo.setState(Demo.DEFAULT)">move</button>
-	<button class="btn" onclick="javascript:demo.setState(Demo.DRAWPOLYGON)">draw shape</button>
-	<button class="btn btn-info" onclick="javascript:demo.setState(Demo.DRAWCIRCLE)">draw circle</button>
-</div>
-
-<div class="well" id="demo_container"></div>
-
-"""
-
 html_editor = ace.edit( 'EDITOR_HTML' )
 html_editor.setTheme("ace/theme/monokai")
 html_editor.getSession().setMode("ace/mode/html")
-html_editor.setValue( _html_ )
+html_editor.setValue('<div class="well"><button class="btn" onclick="javascript:on_click(this)">clickme</button></div>')
 
 ## setup default imports ##
 def _make_list_item( url, ul, manager ):
@@ -176,7 +55,7 @@ def _make_list_item( url, ul, manager ):
 	edit.appendChild( document.createTextNode('edit') )
 	def func():
 		print('opening', url)
-		open_editor_window( url, open(os.path.join('pypubjs',url), 'r').read() )
+		open_editor_window( url, open(url, 'r').read() )
 
 	edit.addEventListener('click', func)
 
@@ -205,7 +84,7 @@ def add_css_import( url ):
 	ul = document.getElementById('IMPORTS_CSS')
 	_make_list_item( url, ul, CssImports )
 
-for url in ['../external/css/bootstrap.css', '../external/css/darkstrap.css']:
+for url in ['external/css/bootstrap.css', 'external/css/darkstrap.css']:
 	add_css_import( url )
 
 JsImports = []
@@ -214,14 +93,10 @@ def add_js_import( url ):
 	_make_list_item( url, ul, JsImports )
 
 _DEFAULT_EXTERN_JS = [
-	'../pythonjs.js', 
-	'../external/jquery/jquery-latest.js', 
-	'../external/bootstrap/bootstrap.min.js',
-	'../external/p2.js/p2.min.js',
-	'../external/p2.js/p2.extras.js',
-	'../external/pixi.js/pixi.dev.js',
-	'../external/p2.js/Demo.js',
-	'../external/p2.js/PixiDemo.js',
+	#'../pythonjs.js', 
+	'external/jquery/jquery-latest.js', 
+	'external/bootstrap/bootstrap.min.js',
+	'external/pixi.js/pixi.dev.js',
 ]
 for url in _DEFAULT_EXTERN_JS:
 	add_js_import( url )
@@ -266,14 +141,14 @@ def export_phonegap():
 		js_imports = ['phonegap.js']
 		for path in JsImports:
 			filename = os.path.split(path)[-1]
-			data = open( os.path.join('pypubjs', path), 'r' ).read()
+			data = open( path, 'r' ).read()
 			open( os.path.join(jsdir, filename), 'w').write( data )
 			js_imports.append( 'js/'+filename )
 
 		css_imports = []
 		for path in CssImports:
 			filename = os.path.split(path)[-1]
-			data = open( os.path.join('pypubjs', path), 'r' ).read()
+			data = open( path, 'r' ).read()
 			open( os.path.join(cssdir, filename), 'w').write( data )
 			css_imports.append( 'css/'+filename )
 
@@ -334,6 +209,7 @@ def compile_app( preview=False, css_imports=None, js_imports=None, callback=None
 			out.append( '<script type="text/javascript" src="%s"></script>'%url )
 	
 	out.append('<script type="text/javascript">')
+	out.append( pythonjs.runtime.javascript )
 	out.append( js_head_editor.getValue() )
 	out.append('</script>')
 
@@ -494,18 +370,6 @@ def on_drop(e):
 
 
 
-worker = new( Worker('../pythonjs/empythoned-webworker.js') )
-def empythoned_output( output ):
-	document.getElementById('EMPYTHONED_OUTPUT').value += output.data
-
-def empythoned_eval( code ):
-	worker.postMessage( code )
-worker.addEventListener('message', empythoned_output)
-
-def update_empythoned_console( input ):
-	document.getElementById('EMPYTHONED_OUTPUT').value += '\n>>>' + input.value + '\n'
-	empythoned_eval(input.value+'\n')
-	input.value=''
 
 ############################################################
 
