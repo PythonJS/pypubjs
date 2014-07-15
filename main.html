@@ -20,7 +20,8 @@ var pythonjs = require('python-js')
 function translate_app() {
 	var pycode = fs.readFileSync( './app.py', {'encoding':'utf8'} )
 	var jscode = pythonjs.translator.to_javascript( pycode )
-	eval( pythonjs.runtime.javascript + jscode )
+	// must call window.eval to make the eval context global
+	window.eval( pythonjs.runtime.javascript + jscode )
 }
 
 function translate( options ) {

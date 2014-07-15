@@ -1,6 +1,9 @@
 # PythonJS Integrated Development Environment "pypubjs"
 # by Brett Hartshorn - copyright 2014
 # License: "New BSD"
+
+#pythonjs.configure(runtime_exceptions=False)
+
 import os          ## nodejs only
 import tempfile    ## nodejs only
 import subprocess  ## nodejs only
